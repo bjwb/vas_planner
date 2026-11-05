@@ -1,0 +1,70 @@
+<!--
+  Start each goal with the planner selected on planner_selector (GridBased by
+  default). Once that planner fails, use FallbackGrid for the rest of the goal.
+  Keep grid_mode outside NavigateRecovery so recovery retries do not reset it.
+  Requires GridBased and FallbackGrid in planner_server.planner_plugins and
+  nav2_goal_updated_controller_bt_node in bt_navigator.plugin_lib_names.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="InitializeAndNavigate">
+      <GoalUpdatedController>
+        <SetBlackboard output_key="grid_mode" value="false"/>
+      </GoalUpdatedController>
+
+      <RecoveryNode number_of_retries="15" name="NavigateRecovery">
+        <PipelineSequence name="NavigateWithReplanning">
+          <ControllerSelector selected_controller="{selected_controller}" default_controller="FollowPath" topic_name="controller_selector"/>
+          <PlannerSelector selected_planner="{selected_planner}" default_planner="GridBased" topic_name="planner_selector"/>
+
+          <RateController hz="1">
+            <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+              <Fallback name="PlanWithStickyGridFallback">
+                <BlackboardCheckBool value_A="{grid_mode}" value_B="false" return_on_mismatch="FAILURE">
+                  <ComputePathToPose goal="{goal}" path="{path}" planner_id="{selected_planner}"/>
+                </BlackboardCheckBool>
+                <Sequence name="EnterGridModeAndPlan">
+                  <SetBlackboard outpukey="grid_mode" value="true"/>
+                  <ComputePathToPose goal="{goal}" path="{path}" planner_id="FallbackGrid"/>
+                </Sequence>
+              </Fallback>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+            </RecoveryNode>
+          </RateController>
+
+          <ReactiveSequence name="MonitorAndFollowPath">
+            <PathLongerOnApproach path="{path}" prox_len="1.0" length_factor="1.0">
+              <RetryUntilSuccessful num_attempts="5">
+                <SequenceStar name="CancelingControlAndWait">
+                  <CancelControl name="ControlCancel"/>
+                  <Wait wait_duration="2.0"/>
+                </SequenceStar>
+              </RetryUntilSuccessful>
+            </PathLongerOnApproach>
+            <RecoveryNode number_of_retries="1" name="FollowPath">
+              <FollowPath path="{path}" controller_id="{selected_controller}"/>
+              <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+            </RecoveryNode>
+          </ReactiveSequence>
+        </PipelineSequence>
+
+        <ReactiveFallback name="RecoveryFallback">
+          <GoalUpdated/>
+          <RoundRobin name="RecoveryActions">
+            <Sequence name="ClearingActions">
+              <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+            </Sequence>
+            <Wait wait_duration="2.0"/>
+            <!-- <BackUp backup_dist="0.30" backup_speed="0.1"/> -->
+            <!-- <Wait wait_duration="1.0"/>
+            <Spin spin_dist="1.0"/>
+            <Wait wait_duration="1.0"/>
+            <Spin spin_dist="-2.0"/>
+            <Wait wait_duration="2.0"/> -->
+          </RoundRobin>
+        </ReactiveFallback>
+      </RecoveryNode>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

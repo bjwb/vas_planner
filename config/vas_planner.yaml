@@ -1,0 +1,16 @@
+# Merge this planner_server section into the Nav2 parameters used by your robot.
+# The JSON's meter coordinates must match your global costmap's map frame.
+planner_server:
+  ros__parameters:
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "vas_planner/VasPlanner"
+      graph_file: "/home/airbot/app_rw/map/airbot_map_00_voronoi_graph.json"
+      graph_frame: "map"
+      interpolation_resolution: 0.05
+      # -1: inherit JSON radius/margin. The radius is never smaller than the
+      # current global costmap footprint's circumscribed radius.
+      robot_radius: -1.0
+      safety_margin: -1.0
+      # Maximum start/goal connector length in meters. 0 means unlimited.
+      max_connection_distance: 0.0

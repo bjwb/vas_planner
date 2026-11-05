@@ -1,0 +1,7 @@
+<library path="vas_planner_plugin">
+  <class name="vas_planner/VasPlanner"
+         type="vas_planner::VasPlanner"
+         base_class_type="nav2_core::GlobalPlanner">
+    <description>vas_planner: A* on a JSON Voronoi graph between nearest start and goal nodes.</description>
+  </class>
+</library>
