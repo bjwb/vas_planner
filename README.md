@@ -131,8 +131,3 @@ cd ~/ros2_ws
 colcon test --packages-select vas_planner --event-handlers console_direct+
 colcon test-result --verbose
 ```
-
-Tests cover JSON validation, sparse IDs, shortest-path selection, bidirectional and disconnected graphs, edge filtering, nearest-node connectors, dynamic edge blockage, footprint clearance, unknown/outside cells, and interpolation. Tests use synthetic costmaps and do not move a robot.
-=======
-# vas_planner
->>>>>>> origin/main
