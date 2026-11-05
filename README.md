@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # vas_planner
 
 `vas_planner` is a C++ global planner for **ROS 2 Humble / Nav2**. It loads the roadmap JSON produced by `pgm_voronoi.py` and searches its nodes and edges with A*.
