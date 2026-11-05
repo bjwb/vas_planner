@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # vas_planner
 
 `vas_planner` is a C++ global planner for **ROS 2 Humble / Nav2**. It loads the roadmap JSON produced by `pgm_voronoi.py` and searches its nodes and edges with A*.
@@ -133,3 +134,6 @@ colcon test-result --verbose
 ```
 
 Tests cover JSON validation, sparse IDs, shortest-path selection, bidirectional and disconnected graphs, edge filtering, nearest-node connectors, dynamic edge blockage, footprint clearance, unknown/outside cells, and interpolation. Tests use synthetic costmaps and do not move a robot.
+=======
+# vas_planner
+>>>>>>> origin/main
